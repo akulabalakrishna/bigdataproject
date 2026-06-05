@@ -1,0 +1,53 @@
+# Big Data & ML Project
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+nosetests.xml
+coverage.xml
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Spark / Java
+.ivy2/
+metastore_db/
+derby.log
+spark-warehouse/
+
+# Data Files (PhysioNet / MIMIC-III strict privacy)
+data/raw/
+data/bronze/
+data/silver/
+data/gold/
+*.csv
+*.csv.gz
+*.parquet
+*.json
+*.sqlite
+*.db
+
+# MLflow & Models
+mlflow_data/
+mlruns/
+models/*.joblib
+models/*.pkl
+models/*.h5
+models/*.onnx
+
+# Docker / Credentials / Environment
+.env
+logs/
+postgres_data/
+minio_data/
+grafana_data/
+
+# Screenshots with PHI
+screenshots/*_phi.*
+
+# Docker service local volumes
+data/minio/
+data/postgres/

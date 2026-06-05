@@ -1,0 +1,49 @@
+graph TD
+    subgraph "1. Ingestion Layer"
+        MIMIC[Real MIMIC-III Subset] --> KP[Kafka Producer]
+        KP --> KT[Kafka Topic: mimic-admissions]
+    end
+
+    subgraph "2. Storage Layer (Lakehouse)"
+        KT --> MINIO[MinIO Object Storage]
+        MINIO --> B[Bronze Layer]
+        B --> S[Silver Layer]
+        S --> G[Gold Layer]
+    end
+
+    subgraph "3. Processing Layer"
+        SB[Spark Batch ETL] -.-> B
+        SB -.-> S
+        SB -.-> G
+        KT --> SS[Spark Structured Streaming]
+    end
+
+    subgraph "4. Orchestration Layer"
+        AF[Apache Airflow] --> SB
+        AF --> TR[ML Training]
+    end
+
+    subgraph "5. ML Training Layer"
+        G --> TR
+        TR --> M[XGBoost Model]
+    end
+
+    subgraph "6. Experiment & Registry"
+        TR --> MF[MLflow Tracking]
+        MF --> MR[MLflow Model Registry]
+    end
+
+    subgraph "7. Serving Layer"
+        M --> BENTO[BentoML REST API]
+        BENTO --> UI[Client/Demo Curl]
+    end
+
+    subgraph "8. Monitoring Layer"
+        BENTO --> PROM[Prometheus]
+        PROM --> GRAF[Grafana Dashboard]
+    end
+
+    style MIMIC fill:#f9f,stroke:#333,stroke-width:4px
+    style G fill:#ffd,stroke:#333,stroke-width:2px
+    style BENTO fill:#dfd,stroke:#333,stroke-width:2px
+    style GRAF fill:#ddf,stroke:#333,stroke-width:2px
