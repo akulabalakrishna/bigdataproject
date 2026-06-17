@@ -1,193 +1,276 @@
-# ICU Readmission Prediction Pipeline - Deliverable 2
+# Z5008 Big Data Lab - Deliverable 3
+## Real-Time Clinical Intelligence Platform for 30-Day ICU Readmission Prediction
 
-## 📌 Project Title
-**Z5008 Big Data Lab - ICU Readmission Prediction using MIMIC-III**
-
-## 📖 Problem Statement
-Hospital readmissions within 30 days are a major driver of healthcare costs and indicate potential gaps in initial care quality. This project builds an end-to-end Big Data and MLOps pipeline to predict 30-day hospital readmissions for ICU patients using the MIMIC-III clinical dataset.
-
-## 🏗️ 8-Layer Architecture
-1. **Data Sources**: MIMIC-III Database (Clinical Data, Demographics, Diagnoses, Procedures).
-2. **Data Ingestion**: Kafka for streaming ingestion, local file loads for batch.
-3. **Data Storage (Data Lake)**: MinIO object storage (S3-compatible) holding Bronze, Silver, and Gold layers.
-4. **Data Processing**: Apache Spark for batch ETL and Structured Streaming.
-5. **Orchestration**: Apache Airflow managing the DAGs and job scheduling.
-6. **Machine Learning**: Scikit-Learn / XGBoost models trained on Gold features.
-7. **Model Management**: MLflow tracking experiments, metrics, and model registry.
-8. **Serving & Monitoring**: BentoML for model serving, Prometheus for metric scraping, Grafana for dashboarding.
-
-## 🛠️ Tool Stack
-| Category | Tool / Technology |
-|----------|-------------------|
-| **Programming Language** | Python 3.10 |
-| **Big Data Processing** | Apache Spark 3.5.1 (PySpark) |
-| **Data Lake Storage** | MinIO |
-| **Streaming / Messaging** | Apache Kafka & Zookeeper |
-| **Orchestration** | Apache Airflow |
-| **ML Tracking & Registry** | MLflow |
-| **Model Serving (API)** | BentoML |
-| **Relational Database** | PostgreSQL 15 |
-| **Monitoring & Dashboards** | Prometheus & Grafana |
-| **Infrastructure** | Docker Compose |
-
-## 📁 Directory Structure
-```
-.
-├── dags/                  # Airflow pipeline definitions
-├── dashboards/            # Grafana dashboard JSON exports
-├── data/                  # Sample data instructions (Raw data ignored)
-├── docker-compose.yml     # Infrastructure setup for all services
-├── models/                # Saved ML artifacts (ignored by git)
-├── notebooks/             # Exploratory Data Analysis notebooks
-├── reports/               # Auto-generated profiling reports
-├── screenshots/           # Evidence of working system
-├── src/
-│   ├── ingestion/         # Data check scripts and ingestion logic
-│   ├── monitoring/        # Prometheus config
-│   ├── serving/           # BentoML API definitions
-│   ├── spark_jobs/        # Production Spark batch and streaming .py jobs
-│   └── training/          # MLflow training scripts
-└── tests/                 # Pytest unit tests
-```
-
-## ⚙️ Setup Instructions
-
-### 1. Environment Variables
-Copy `.env.example` to `.env` and fill in any required passwords.
-```bash
-cp .env.example .env
-```
-
-### 2. Infrastructure Setup
-Start all services using Docker Compose:
-```bash
-docker compose up -d
-```
-> **Note**: Verify services are running with `docker ps`.
-
-### 3. Dependencies
-Install the Python requirements on your local host (or inside a virtual environment):
-```bash
-python -m pip install -r requirements.txt
-```
+### Short Project Summary
+End-to-end big data and MLOps pipeline for 30-day ICU readmission prediction using local credentialed MIMIC-III data.
 
 ---
 
-## 🚀 Running the Pipeline
+### Deliverable 3 Compliance Summary
 
-### 1. MinIO Check Command
-To verify MinIO is accessible and buckets exist:
+| Requirement | Implementation Details |
+| --- | --- |
+| **Docker Compose all services** | Cluster orchestrated via `docker-compose.yml` defining all network services. |
+| **Kafka real-data ingestion** | Pseudo real-time Python producer sending safe patient admission records. |
+| **MinIO/lakehouse Bronze/Silver/Gold** | Dedicated layered buckets mapped locally storing processed data. |
+| **Spark batch ETL** | PySpark Structured ETL pipelines extracting/transforming clinical data. |
+| **Spark Structured Streaming** | Continuous windowed stream processing from Kafka `mimic-admissions` topic. |
+| **Airflow DAG orchestration** | Fully integrated DAG `icu_readmission_real_pipeline` orchestrating the ETL. |
+| **MLflow 5 runs and registry/artifacts** | Grid search with 5 models, registering the best (`LogisticRegression`). |
+| **BentoML POST prediction API** | Async REST API accepting live JSON payloads and rendering risk. |
+| **Real-data prediction payload** | Executed using valid clinical payload structures from the test split. |
+| **10x load test** | API stressed properly reflecting ~24ms response latency. |
+| **Prometheus/Grafana monitoring** | Endpoint telemetry actively scraped by Prometheus and configured. |
+| **Pytest unit tests** | Validated core API prediction preprocessing logic safely. |
+| **Raw data privacy and .gitignore** | Strict `.gitignore` implementations preventing leak of patient data. |
+
+---
+
+### 8-Layer Architecture
+1. **Data source:** MIMIC-III local credentialed dataset.
+2. **Ingestion:** Kafka producer using MIMIC-derived records.
+3. **Storage:** MinIO/lakehouse-style Bronze, Silver, Gold zones.
+4. **Processing:** Spark batch and Spark Structured Streaming.
+5. **Orchestration:** Airflow DAG.
+6. **ML training:** Gold features + MLflow experiment tracking with 5 model runs.
+7. **Serving:** BentoML REST API.
+8. **Monitoring:** Prometheus/Grafana evidence and API load test.
+
+---
+
+### Tool Stack
+
+| Tool | Purpose |
+| --- | --- |
+| Python | Core programming language |
+| Docker Compose | Container orchestration |
+| Kafka & Zookeeper | Real-time event streaming |
+| Spark 3.5.1 | Big Data Batch/Streaming processing |
+| MinIO | S3-compatible Object Storage |
+| Airflow | Workflow orchestration |
+| MLflow | Experiment tracking & Model Registry |
+| BentoML | Model Serving & REST API |
+| Prometheus | Metrics collection |
+| Grafana | Metrics visualization dashboard |
+| Pytest | Unit testing |
+
+---
+
+### Directory Structure
+
+```text
+dags/               # Airflow DAG configurations
+src/ingestion/      # Kafka producers
+src/spark_jobs/     # Spark batch processing (Bronze/Silver/Gold)
+src/training/       # MLflow experiment grid search
+src/serving/        # BentoML serving logic
+src/monitoring/     # Prometheus configuration
+reports/            # Automated evidence logs for Deliverable 3
+scripts/            # API load testing automation
+tests/              # Pytest unit tests
+DELIVERABLE3_LIVE_DEMO_RUNBOOK.md # 8-minute demo runbook
+```
+*(Note: `data/raw` and `data/minio` are purposely ignored by Git).*
+
+---
+
+### Full Reproducible Local Commands
+
+**Bring Up Infrastructure:**
 ```bash
-# Wait for MinIO to initialize, then visit http://localhost:9001
-curl -I http://localhost:9000
+docker compose up -d
+docker compose ps
 ```
 
-### 2. Kafka Producer/Consumer Commands
-To interact with Kafka inside the docker container:
+**Services and Ports:**
+*   **Spark UI:** `http://localhost:8080`
+*   **MLflow:** `http://localhost:5000`
+*   **Airflow:** `http://localhost:8085`
+*   **Prometheus:** `http://localhost:9090`
+*   **Grafana:** `http://localhost:3001`
+*   **BentoML API:** `http://localhost:3002`
+
+---
+
+### Bronze/Silver/Gold Commands
+
+Use Spark cluster mode commands. 
+
+**Bronze Job:**
 ```bash
-# Create topic
-docker exec -it kafka kafka-topics --create --topic icu_admissions --bootstrap-server localhost:9092
-
-# Start Producer
-docker exec -it kafka kafka-console-producer --topic icu_admissions --bootstrap-server localhost:9092
-
-# Start Consumer
-docker exec -it kafka kafka-console-consumer --topic icu_admissions --from-beginning --bootstrap-server localhost:9092
+docker exec -d spark-master sh -lc '
+cd /opt/spark/work-dir &&
+mkdir -p outputs/logs &&
+nohup /opt/spark/bin/spark-submit \
+  --master spark://spark-master:7077 \
+  --deploy-mode client \
+  --driver-memory 2g \
+  --executor-memory 2g \
+  --conf spark.sql.shuffle.partitions=4 \
+  src/spark_jobs/bronze_job.py \
+  > outputs/logs/bronze_run.log 2>&1 &
+'
 ```
 
-### 3. Spark Batch ETL (Bronze / Silver / Gold)
-Process the data sequentially through the Medallion architecture:
+**Silver Job:**
 ```bash
-# Bronze Layer: Ingest CSV to Parquet
-docker exec -it spark-master /opt/spark/bin/spark-submit /opt/spark/work-dir/src/spark_jobs/bronze_job.py
-
-# Silver Layer: Clean and transform tables
-docker exec -it spark-master /opt/spark/bin/spark-submit /opt/spark/work-dir/src/spark_jobs/silver_job.py
-
-# Gold Layer: Feature Engineering for Readmission
-docker exec -it spark-master /opt/spark/bin/spark-submit /opt/spark/work-dir/src/spark_jobs/gold_job.py
+docker exec -d spark-master sh -lc '
+cd /opt/spark/work-dir &&
+mkdir -p outputs/logs &&
+nohup /opt/spark/bin/spark-submit \
+  --master spark://spark-master:7077 \
+  --deploy-mode client \
+  --driver-memory 2g \
+  --executor-memory 2g \
+  --conf spark.sql.shuffle.partitions=4 \
+  src/spark_jobs/silver_job.py \
+  > outputs/logs/silver_run.log 2>&1 &
+'
 ```
 
-### 4. Spark Streaming Command
-To run the Spark streaming job with the Kafka connector and a writable Ivy cache:
+**Gold Job:**
 ```bash
-docker exec -it spark-master /opt/spark/bin/spark-submit \
-  --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1 \
-  --conf spark.jars.ivy=/tmp/.ivy2 \
-  /opt/spark/work-dir/src/spark_jobs/streaming_kafka_demo.py
+docker exec -d spark-master sh -lc '
+cd /opt/spark/work-dir &&
+mkdir -p outputs/logs &&
+nohup /opt/spark/bin/spark-submit \
+  --master spark://spark-master:7077 \
+  --deploy-mode client \
+  --driver-memory 2g \
+  --executor-memory 2g \
+  --conf spark.sql.shuffle.partitions=4 \
+  src/spark_jobs/gold_job.py \
+  > outputs/logs/gold_run.log 2>&1 &
+'
 ```
 
-### 5. MLflow Startup & Training Command
-MLflow is running via Docker. To train the model and track it:
+**Gold Output Location:**
+`data/minio/lakehouse/gold/readmission_features`
+
+---
+
+### MLflow Training Command
+
+*(Using Git Bash locally):*
 ```bash
 export MLFLOW_TRACKING_URI=http://localhost:5000
 python src/training/train.py
 ```
+**Evidence:** `reports/mlflow_5_runs_evidence.md`
 
-### 6. BentoML API Command
-Start the BentoML service using the module path:
-```bash
-export PYTHONPATH=$PWD
-python -m bentoml serve src.serving.service:svc --reload --host 0.0.0.0 --port 3000
-```
+---
 
-### 7. Make a Prediction (Curl)
-Test the deployed BentoML API:
+### BentoML Command
 ```bash
-curl -X POST http://localhost:3000/predict \
-     -H "Content-Type: application/json" \
-     -d '{"AGE": 65, "GENDER": "M", "ADMISSION_TYPE": "EMERGENCY", "INSURANCE": "Medicare", "RELIGION": "CATHOLIC", "MARITAL_STATUS": "MARRIED", "ETHNICITY": "WHITE", "DIAG_COUNT": 8, "PROC_COUNT": 3, "AVG_ICU_LOS": 4.5, "ICU_STAY_COUNT": 1}'
-```
-
-### 8. Load Test Command
-Use the provided script to simulate traffic:
-```bash
-python src/serving/load_test_api.py
-```
-
-### 9. Run Unit Tests
-To run the project tests locally:
-```bash
-python -m pytest tests -v
+python -m bentoml serve src.serving.service:svc --port 3002
 ```
 
 ---
 
-## 📊 Monitoring URLs
-- **Spark Master UI**: [http://localhost:8080](http://localhost:8080)
-- **Airflow Webserver**: [http://localhost:8085](http://localhost:8085)
-- **MinIO Console**: [http://localhost:9001](http://localhost:9001)
-- **MLflow UI**: [http://localhost:5000](http://localhost:5000)
-- **BentoML Swagger UI**: [http://localhost:3000](http://localhost:3000)
-- **Prometheus**: [http://localhost:9090](http://localhost:9090)
-- **Grafana**: [http://localhost:3001](http://localhost:3001)
+### Prediction Command
+```bash
+curl -X POST http://localhost:3002/predict \
+  -H "Content-Type: application/json" \
+  -d @examples/readmission_prediction_payload.json
+```
+**Evidence:** `reports/bentoml_prediction_evidence.md`
 
 ---
 
-## 📸 Screenshots List
-Evidence of the working system is saved in the `screenshots/` directory:
-- `airflow_dag.png`: Airflow pipeline execution.
-- `mlflow_experiments.png`: MLflow tracking UI.
-- `grafana_dashboard.png`: System monitoring dashboard.
-- `spark_ui.png`: Spark job execution DAG.
+### Load Test Command
+```bash
+python scripts/load_test_api.py
+```
+**Evidence:** `reports/api_10x_load_test_evidence.md`
 
 ---
 
-## 🛡️ MIMIC-III Privacy Notice
-**DO NOT UPLOAD RAW DATA.** The MIMIC-III dataset contains restricted clinical data governed by PhysioNet. All raw data files (`.csv.gz`, `.parquet`) and subsets in `data/raw`, `data/bronze`, `data/silver`, and `data/gold` are strictly excluded from version control via `.gitignore`. Users must obtain credentialed access from PhysioNet directly to download the dataset.
+### Kafka Commands
+
+*Target Topic: `mimic-admissions`*
+
+**Producer:**
+```bash
+python src/ingestion/kafka_producer.py
+```
+
+**Consumer:**
+```bash
+docker exec z5008_readmission_project-kafka-1 kafka-console-consumer \
+  --bootstrap-server localhost:9092 \
+  --topic mimic-admissions \
+  --from-beginning \
+  --max-messages 5
+```
+*(If container name differs, run `docker compose ps` and use the exact Kafka container name).*
 
 ---
 
-## 🤖 AI Tool Usage Declaration
-AI tools (e.g., ChatGPT, Gemini) were utilized during the development of this project for:
-- Writing PySpark data transformation boilerplate logic.
-- Troubleshooting Docker network connectivity and volume mount issues.
-- Generating unit test mock structures and `pytest` scaffolding.
-- Structuring Markdown documentation (like this README).
+### Spark Streaming Command
+```bash
+docker exec spark-master sh -lc "/opt/spark/bin/spark-submit \
+  --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1 \
+  --conf spark.jars.ivy=/tmp/.ivy2 \
+  /opt/spark/work-dir/src/spark_jobs/streaming_kafka_demo.py"
+```
+**Evidence:** `reports/spark_structured_streaming_evidence.md`
 
 ---
 
-## 🚑 Troubleshooting
-- **Docker Compose Exit 137**: Increase Docker Desktop memory allocation to at least 8GB.
-- **Spark Submit Ivy Error**: If Spark streaming fails to download Kafka dependencies, ensure you pass `--conf spark.jars.ivy=/tmp/.ivy2` so the container has a writable cache path.
-- **Port Conflicts**: If port `5432` or `5000` is in use locally, change the port mappings in `docker-compose.yml` or stop local instances of PostgreSQL/MLflow.
+### Airflow Command
+```bash
+docker exec z5008_readmission_project-airflow-webserver-1 airflow dags list
+```
+**Evidence:** `reports/airflow_evidence.md`
+
+---
+
+### Monitoring Evidence
+- **Prometheus URL:** `http://localhost:9090`
+- **Grafana URL:** `http://localhost:3001`
+- **Evidence:** `reports/grafana_metrics_evidence.md`
+
+---
+
+### Tests
+```bash
+python -m pytest -q
+```
+**Evidence:** `reports/pytest_evidence.md`
+
+---
+
+### MIMIC-III Privacy Notice
+- Raw MIMIC-III data is **not** included in this repository.
+- Users must obtain credentialed access from PhysioNet.
+- `data/raw`, `data/minio`, `mlflow_data`, `models`, and logs are strictly ignored.
+- No patient-level raw records are committed to version control.
+
+---
+
+### Local Demo Optimization Note
+The full local MIMIC-III dataset was audited. For laptop-safe Deliverable 3 execution, extremely large raw tables such as `CHARTEVENTS`, `NOTEEVENTS`, and `PROCEDUREEVENTS_MV` were deferred in the fast Bronze run, while remaining present locally and documented. The pipeline uses real MIMIC-derived data for Bronze/Silver/Gold, Kafka, MLflow, and BentoML demonstrations.
+
+---
+
+### Evidence Reports List
+*   `reports/deliverable3_strict_guideline_compliance_checklist.md`
+*   `reports/deliverable3_pipeline_compatibility_audit.md`
+*   `reports/mlflow_5_runs_evidence.md`
+*   `reports/bentoml_prediction_evidence.md`
+*   `reports/api_10x_load_test_evidence.md`
+*   `reports/kafka_real_data_ingestion_evidence.md`
+*   `reports/spark_structured_streaming_evidence.md`
+*   `reports/airflow_evidence.md`
+*   `reports/grafana_metrics_evidence.md`
+*   `reports/pytest_evidence.md`
+
+---
+
+### Video Walkthrough
+`DELIVERABLE3_LIVE_DEMO_RUNBOOK.md` contains the 8-minute live demo order.
+
+---
+
+### Final Submission Statement
+This repository contains source code, Docker configuration, orchestration scripts, pipeline jobs, tests, runbook, and evidence reports only. Raw clinical data and generated lakehouse/model artifacts are intentionally excluded.
