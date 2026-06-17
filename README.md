@@ -245,3 +245,7 @@ The full local MIMIC-III dataset was thoroughly audited. For laptop-safe executi
 
 ## 21. AI Tool Usage Declaration
 AI coding assistants were used for documentation drafting, debugging guidance, and code review support. All generated code was reviewed, executed, and comprehensively validated by the project author.
+
+## 22. Final Local Rerun Evidence
+
+A final end-to-end execution audit was performed on the local credentialed dataset. Please review [reports/final_rerun_and_submission_evidence.md](reports/final_rerun_and_submission_evidence.md) and the \screenshots/\ directory (if captured) for explicit proof of the system's runtime health, metric collections, and data privacy compliance prior to submission.
