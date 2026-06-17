@@ -52,3 +52,5 @@ screenshots/*_phi.*
 data/minio/
 data/postgres/
 bentoml_stderr.log
+bentoml_stderr.log
+*.log
