@@ -3,32 +3,14 @@ import numpy as np
 import mlflow
 import mlflow.sklearn
 import mlflow.xgboost
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
-import xgboost as xgb
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix
-import matplotlib.pyplot as plt
-import seaborn as sns
-import os
-import joblib
-import pyarrow.parquet as pq
-import sys
-
-import pandas as pd
-import numpy as np
-import mlflow
-import mlflow.sklearn
-import mlflow.xgboost
 from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.preprocessing import StandardScaler, OneHotEncoder, FunctionTransformer
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.naive_bayes import GaussianNB
 import xgboost as xgb
 from sklearn.metrics import (
     accuracy_score, precision_score, recall_score, f1_score, 
@@ -44,8 +26,9 @@ import sys
 def train():
     # Configuration
     MLFLOW_URI = "http://localhost:5000"
-    GOLD_DATA_PATH = "E:/Z5008_Readmission_Project/data/gold/mimiciii/READMISSION_FEATURES"
-    MODELS_DIR = "E:/Z5008_Readmission_Project/models"
+    base_dir = os.environ.get("PROJECT_PATH", "E:/Z5008_Readmission_Project")
+    GOLD_DATA_PATH = os.path.join(base_dir, "data/minio/lakehouse/gold/readmission_features")
+    MODELS_DIR = os.path.join(base_dir, "models")
     
     os.makedirs(MODELS_DIR, exist_ok=True)
 
@@ -105,13 +88,23 @@ def train():
             "model": RandomForestClassifier(n_estimators=100, class_weight="balanced", random_state=42),
             "params": {}
         },
-        "XGBoost": {
-            "model": xgb.XGBClassifier(use_label_encoder=False, eval_metric='logloss', scale_pos_weight=scale_pos_weight, random_state=42),
+        "DecisionTree": {
+            "model": DecisionTreeClassifier(class_weight="balanced", random_state=42),
+            "params": {}
+        },
+        "GaussianNB": {
+            "model": Pipeline([
+                ('todense', FunctionTransformer(lambda x: x.toarray() if hasattr(x, 'toarray') else x, accept_sparse=True)),
+                ('gnb', GaussianNB())
+            ]),
+            "params": {}
+        },
+        "GradientBoosting": {
+            "model": GradientBoostingClassifier(random_state=42),
             "params": {
                 "classifier__n_estimators": [100, 200],
                 "classifier__max_depth": [3, 5],
-                "classifier__learning_rate": [0.05, 0.1],
-                "classifier__subsample": [0.8, 1.0]
+                "classifier__learning_rate": [0.05, 0.1]
             }
         }
     }
@@ -217,9 +210,9 @@ def train():
                     mlflow.sklearn.log_model(
                         sk_model=best_model_data["pipeline"],
                         artifact_path="model",
-                        registered_model_name="ICU_Readmission_XGBoost_Real"
+                        registered_model_name="ICU_Readmission_Real_Model"
                     )
-                print("Successfully registered model: ICU_Readmission_XGBoost_Real")
+                print("Successfully registered model: ICU_Readmission_Real_Model")
             except Exception as e:
                 print(f"Warning: Model registration failed: {e}")
 

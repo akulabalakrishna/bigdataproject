@@ -31,32 +31,30 @@ data_check = BashOperator(
 )
 
 # 2. Bronze Job (Spark)
-# Note: In a real production setup, we would use SparkSubmitOperator or a DockerOperator.
-# For the demo, we show the orchestration flow.
 bronze_job = BashOperator(
     task_id='bronze_job',
-    bash_command='echo "Executing Spark Bronze Job for Real Data Ingestion..." && sleep 5',
+    bash_command=f'export PROJECT_PATH={PROJECT_PATH} && python {PROJECT_PATH}/src/spark_jobs/bronze_job.py',
     dag=dag,
 )
 
 # 3. Silver Job (Spark)
 silver_job = BashOperator(
     task_id='silver_job',
-    bash_command='echo "Executing Spark Silver Job for Cleaning and Joining..." && sleep 5',
+    bash_command=f'export PROJECT_PATH={PROJECT_PATH} && python {PROJECT_PATH}/src/spark_jobs/silver_job.py',
     dag=dag,
 )
 
 # 4. Gold Job (Spark)
 gold_job = BashOperator(
     task_id='gold_job',
-    bash_command='echo "Executing Spark Gold Job for Feature Engineering..." && sleep 5',
+    bash_command=f'export PROJECT_PATH={PROJECT_PATH} && python {PROJECT_PATH}/src/spark_jobs/gold_job.py',
     dag=dag,
 )
 
 # 5. ML Training
 train_model = BashOperator(
     task_id='train_model',
-    bash_command=f'python {PROJECT_PATH}/src/training/train.py',
+    bash_command=f'export PROJECT_PATH={PROJECT_PATH} && python {PROJECT_PATH}/src/training/train.py',
     dag=dag,
 )
 

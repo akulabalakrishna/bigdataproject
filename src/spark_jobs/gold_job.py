@@ -8,11 +8,12 @@ def run_gold_job():
         .appName("ICU_Gold_Job") \
         .getOrCreate()
 
-    # Paths updated for Apache Spark container structure
-    silver_path = "/opt/spark/work-dir/data/silver/mimiciii"
-    gold_path = "/opt/spark/work-dir/data/gold/mimiciii"
+    base_dir = os.environ.get("PROJECT_PATH", "/opt/spark/work-dir")
+    lakehouse_path = f"{base_dir}/data/minio/lakehouse"
+    silver_path = f"{lakehouse_path}/silver/mimiciii"
+    gold_path = f"{lakehouse_path}/gold/mimiciii"
     
-    os.makedirs("/opt/spark/work-dir/data/gold", exist_ok=True)
+    os.makedirs(gold_path, exist_ok=True)
 
     if not os.path.exists(f"{silver_path}/ADMISSIONS_CLEANED") or not os.path.exists(f"{silver_path}/PATIENTS_CLEANED"):
         print("ERROR: Mandatory tables missing in Silver layer.")
@@ -56,8 +57,23 @@ def run_gold_job():
     if os.path.exists(f"{silver_path}/ICUSTAYS_CLEANED"):
         print("Adding ICU features...")
         icustays = spark.read.parquet(f"{silver_path}/ICUSTAYS_CLEANED")
+        icustays = icustays.withColumn("LOS", col("LOS").cast("float"))
         icu_stats = icustays.groupBy("HADM_ID").agg(avg("LOS").alias("AVG_ICU_LOS"), count("ICUSTAY_ID").alias("ICU_STAY_COUNT"))
         df = df.join(icu_stats, "HADM_ID", "left").fillna(0, subset=["AVG_ICU_LOS", "ICU_STAY_COUNT"])
+
+    # Optional Feature: Prescriptions Count
+    if os.path.exists(f"{silver_path}/PRESCRIPTIONS_CLEANED"):
+        print("Adding Prescription features...")
+        prescriptions = spark.read.parquet(f"{silver_path}/PRESCRIPTIONS_CLEANED")
+        rx_counts = prescriptions.groupBy("HADM_ID").agg(count("DRUG").alias("RX_COUNT"))
+        df = df.join(rx_counts, "HADM_ID", "left").fillna(0, subset=["RX_COUNT"])
+
+    # Optional Feature: Lab Events Count
+    if os.path.exists(f"{silver_path}/LABEVENTS_CLEANED"):
+        print("Adding Lab Event features...")
+        labevents = spark.read.parquet(f"{silver_path}/LABEVENTS_CLEANED")
+        lab_counts = labevents.groupBy("HADM_ID").agg(count("ITEMID").alias("LAB_COUNT"))
+        df = df.join(lab_counts, "HADM_ID", "left").fillna(0, subset=["LAB_COUNT"])
 
     # Select final features
     feature_cols = [
@@ -70,11 +86,13 @@ def run_gold_job():
     if "PROC_COUNT" in df.columns: feature_cols.append("PROC_COUNT")
     if "AVG_ICU_LOS" in df.columns: feature_cols.append("AVG_ICU_LOS")
     if "ICU_STAY_COUNT" in df.columns: feature_cols.append("ICU_STAY_COUNT")
+    if "RX_COUNT" in df.columns: feature_cols.append("RX_COUNT")
+    if "LAB_COUNT" in df.columns: feature_cols.append("LAB_COUNT")
 
     final_features = df.select(*feature_cols)
 
-    final_features.write.mode("overwrite").parquet(f"{gold_path}/READMISSION_FEATURES")
-    print(f"Gold job complete: READMISSION_FEATURES saved to {gold_path}/READMISSION_FEATURES")
+    final_features.write.mode("overwrite").parquet(f"{lakehouse_path}/gold/readmission_features")
+    print(f"Gold job complete: readmission_features saved to {lakehouse_path}/gold/readmission_features")
 
     spark.stop()
 

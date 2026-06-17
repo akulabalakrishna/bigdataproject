@@ -51,3 +51,4 @@ screenshots/*_phi.*
 # Docker service local volumes
 data/minio/
 data/postgres/
+bentoml_stderr.log

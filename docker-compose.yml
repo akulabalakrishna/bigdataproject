@@ -92,14 +92,14 @@ services:
       - icu_readmission_network
 
   mlflow:
-    image: python:3.10-slim
+    image: ghcr.io/mlflow/mlflow:v2.9.2
     container_name: mlflow
     command: >
-      sh -c "pip install mlflow==2.9.2 && mlflow server
+      mlflow server
       --host 0.0.0.0
       --port 5000
-      --backend-store-uri sqlite:///mlflow/mlflow.db
-      --default-artifact-root /mlflow/artifacts"
+      --backend-store-uri sqlite:////mlflow/mlflow.db
+      --default-artifact-root /mlflow/artifacts
     ports:
       - "5000:5000"
     volumes:
