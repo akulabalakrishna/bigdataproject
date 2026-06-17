@@ -111,3 +111,20 @@ Open your browser to the Grafana UI:
 - [ ] **5:00 - 6:00:** BentoML serving startup and cURL prediction demo.
 - [ ] **6:00 - 7:00:** Load Test execution showing throughput metrics.
 - [ ] **7:00 - 8:00:** Grafana Dashboard showing real-time load test spikes and system health.
+
+## Strict Rubric Evidence
+
+**Spark MLlib Path Command:**
+```bash
+export MLFLOW_TRACKING_URI=http://localhost:5000
+python src/training/train_spark_mllib.py
+```
+
+**Lakehouse Readiness Report:**
+`reports/lakehouse_delta_iceberg_readiness.md`
+
+**Privacy Check Commands:**
+```bash
+git status --ignored --short data/raw/mimiciii/ADMISSIONS.csv.gz
+git status --ignored --short data/minio/lakehouse/bronze/mimiciii/ADMISSIONS
+```
