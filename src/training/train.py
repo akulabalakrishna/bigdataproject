@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import mlflow
 import mlflow.sklearn
-import mlflow.xgboost
+# import mlflow.xgboost
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.preprocessing import StandardScaler, OneHotEncoder, FunctionTransformer
 from sklearn.compose import ColumnTransformer
@@ -11,13 +11,17 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.naive_bayes import GaussianNB
-import xgboost as xgb
+# import xgboost as xgb
 from sklearn.metrics import (
     accuracy_score, precision_score, recall_score, f1_score, 
     roc_auc_score, confusion_matrix, average_precision_score
 )
-import matplotlib.pyplot as plt
-import seaborn as sns
+try:
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+except ImportError:
+    plt = None
+    sns = None
 import os
 import joblib
 import pyarrow.parquet as pq
@@ -25,12 +29,17 @@ import sys
 
 def train():
     # Configuration
-    MLFLOW_URI = "http://localhost:5000"
+    MLFLOW_URI = os.environ.get("MLFLOW_TRACKING_URI", "http://mlflow:5000")
     base_dir = os.environ.get("PROJECT_PATH", "E:/Z5008_Readmission_Project")
     GOLD_DATA_PATH = os.path.join(base_dir, "data/minio/lakehouse/gold/readmission_features")
     MODELS_DIR = os.path.join(base_dir, "models")
-    
+
     os.makedirs(MODELS_DIR, exist_ok=True)
+
+    # Inject MinIO S3 credentials so MLflow artifact upload goes to MinIO, not real AWS
+    os.environ.setdefault("AWS_ACCESS_KEY_ID", "admin")
+    os.environ.setdefault("AWS_SECRET_ACCESS_KEY", "adminpassword")
+    os.environ.setdefault("MLFLOW_S3_ENDPOINT_URL", "http://minio:9000")
 
     # Set MLflow tracking URI and check availability
     mlflow_enabled = False
@@ -167,7 +176,10 @@ def train():
                 mlflow.log_params(best_params)
                 mlflow.log_param("best_threshold", best_threshold)
                 mlflow.log_metrics(metrics)
-                mlflow.sklearn.log_model(best_pipeline, "model")
+                try:
+                    mlflow.sklearn.log_model(best_pipeline, "model")
+                except Exception as e:
+                    print(f"Warning: MLflow artifact upload failed for {name}: {e}")
 
         # Update best overall
         if metrics["f1"] > best_overall_f1:

@@ -2,7 +2,8 @@ import os
 import sys
 
 def check_mimic_files():
-    base_path = "E:/Z5008_Readmission_Project/data/raw/mimiciii/"
+    project_path = os.environ.get("PROJECT_PATH", "/opt/airflow/project" if os.name == "posix" else "E:/Z5008_Readmission_Project")
+    base_path = os.path.join(project_path, "data/raw/mimiciii/")
     
     mandatory_files = [
         "ADMISSIONS.csv.gz",

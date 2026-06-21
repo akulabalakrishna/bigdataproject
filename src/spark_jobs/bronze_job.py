@@ -83,15 +83,20 @@ def main():
             .withColumn("bronze_table_name", lit(table))
         )
 
-        df.write.mode("overwrite").parquet(out)
+        df.write.mode("ignore").parquet(out)
         print(f"Successfully saved {table} to {out}")
 
     marker = BRONZE_DIR / "_DEFERRED_LARGE_TABLES.txt"
-    marker.write_text(
+    marker_text = (
         "Deferred for fast Deliverable 3 local run. Raw files remain available in data/raw/mimiciii:\n"
         + "\n".join(sorted(DEFERRED_LARGE_TABLES.intersection(file_map)))
         + "\n"
     )
+    try:
+        marker.unlink(missing_ok=True)
+        marker.write_text(marker_text)
+    except PermissionError:
+        print(f"Warning: Could not write marker file (permission denied) — continuing.")
 
     print("Bronze fast run completed.")
     spark.stop()

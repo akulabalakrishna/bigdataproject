@@ -4,8 +4,8 @@ from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 
 def run_streaming_demo():
     # Paths for container structure
-    checkpoint_path = "/opt/spark/work-dir/data/streaming_demo/checkpoint"
-    output_path = "/opt/spark/work-dir/data/streaming_demo/output"
+    checkpoint_path = "data/streaming_demo/checkpoint"
+    output_path = "data/streaming_demo/output"
 
     spark = SparkSession.builder \
         .appName("Kafka_Streaming_Demo") \

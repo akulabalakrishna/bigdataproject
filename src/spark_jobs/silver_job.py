@@ -47,7 +47,9 @@ def run_silver_job():
             df = df.withColumn("INTIME", to_timestamp("INTIME")) \
                    .withColumn("OUTTIME", to_timestamp("OUTTIME"))
                    
-        df.write.mode("overwrite").parquet(f"{silver_path}/{table}_CLEANED")
+        out_path = f"{silver_path}/{table}_CLEANED"
+        df.write.mode("ignore").parquet(out_path)
+        print(f"Done: {table}_CLEANED")
 
     print(f"Silver job complete. Cleaned tables saved to {silver_path}")
     spark.stop()

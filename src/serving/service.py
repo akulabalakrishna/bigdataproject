@@ -6,8 +6,8 @@ import joblib
 import os
 import traceback
 
-# Configuration
-MODEL_PATH = "E:/Z5008_Readmission_Project/models/best_readmission_model.joblib"
+# Configuration — use env var set in docker-compose, fallback for local dev
+MODEL_PATH = os.environ.get("MODEL_PATH", "/opt/project/models/best_readmission_model.joblib")
 
 # Load model package safely
 print(f"Loading model from {MODEL_PATH}...")
@@ -45,16 +45,23 @@ async def predict(input_data):
         }
 
     try:
-        # Check if model is loaded
-        if model is None:
-            return {"status": "error", "message": "Model not loaded on server."}
+        # Convert input dictionary/list to DataFrame
+        if isinstance(input_data, dict):
+            df = pd.DataFrame([input_data])
+        elif isinstance(input_data, list):
+            df = pd.DataFrame(input_data)
+        else:
+            raise ValueError("Input data must be a dictionary or a list of dictionaries.")
 
-        # Demo bypass for Deliverable 3
+        # Run model prediction
+        prob = np.asarray(model.predict_proba(df))[0, 1]
+        prediction = int(prob >= threshold)
+        
         return {
-            "risk_score": 0.65,
-            "prediction": 1,
-            "threshold": 0.5,
-            "model_name": "ICU_Readmission_Real_Model",
+            "risk_score": float(prob),
+            "prediction": prediction,
+            "threshold": float(threshold),
+            "model_name": str(model_name),
             "status": "success"
         }
         

@@ -91,8 +91,9 @@ def run_gold_job():
 
     final_features = df.select(*feature_cols)
 
-    final_features.write.mode("overwrite").parquet(f"{lakehouse_path}/gold/readmission_features")
-    print(f"Gold job complete: readmission_features saved to {lakehouse_path}/gold/readmission_features")
+    gold_out = f"{lakehouse_path}/gold/readmission_features"
+    final_features.write.mode("overwrite").parquet(gold_out)
+    print(f"Gold job complete: readmission_features saved to {gold_out}")
 
     spark.stop()
 

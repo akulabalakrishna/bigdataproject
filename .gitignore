@@ -54,3 +54,8 @@ data/postgres/
 bentoml_stderr.log
 bentoml_stderr.log
 *.log
+
+# Temporary restore files
+*.before_infrastructure_restore
+.infrastructure_restore_temp/
+
