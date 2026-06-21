@@ -2,7 +2,7 @@
 
 This sheet contains the exact commands and URLs for the live demonstration sequence of the **Real-Time Clinical Intelligence Platform for 30-Day Hospital Readmission Prediction**.
 
-## Live Demo Sequence (8 Minutes)
+## Live Demo Sequence (10 Minutes)
 
 ### 1. Show Infrastructure Status (30 Seconds)
 Verify all microservices are healthy and running:
@@ -30,7 +30,7 @@ Demonstrate data persistence in the MinIO S3 object storage Lakehouse:
 - **Folders to Show:**
   - Bucket: `lakehouse`
   - Navigate and explain:
-    - `bronze/` - Raw parquet tables ingested (1.42 GB, 23 tables).
+    - `bronze/` - Raw parquet tables ingested.
     - `silver/` - Cleaned & type-standardized parquet tables.
     - `gold/` - Feature store containing aggregated ML features (`readmission_features`).
 
@@ -75,6 +75,28 @@ Show real-time API operational metrics:
 - **Actions to Show:**
   - Open Dashboard: **"Clinical Readmission API Analytics"**
   - Show the three active panels (API Request Count, Average Latency, HTTP Error Counts).
+
+---
+
+## Compliance Verification Steps
+
+### 9. Verify Spark MLlib Compliance Tracking (30 Seconds)
+Verify the Spark MLlib compliance training runs and registry status directly from the container:
+*   **Run Check:**
+    ```powershell
+    docker exec airflow-scheduler python -c "import mlflow; mlflow.set_tracking_uri('http://mlflow:5000'); e=[x for x in mlflow.search_experiments() if x.name=='ICU_Readmission_SparkML_Compliance'][0]; d=mlflow.search_runs(experiment_ids=[e.experiment_id]); print(d[['run_id','status','tags.mlflow.runName']].to_string())"
+    ```
+*   **Model Registry Check:**
+    ```powershell
+    docker exec airflow-scheduler python -c "import mlflow; mlflow.set_tracking_uri('http://mlflow:5000'); c=mlflow.tracking.MlflowClient(); print([(m.name,[v.version for v in m.latest_versions]) for m in c.search_registered_models()])"
+    ```
+
+### 10. Inspect Apache Iceberg Warehouse Layout (30 Seconds)
+Confirm the existence of the Apache Iceberg metadata warehouse structure and native tracking files (`v1.metadata.json`, snapshot `.avro`, manifest `.avro`):
+*   **MinIO Storage Check:**
+    ```powershell
+    docker exec minio ls -R /data/lakehouse/iceberg-warehouse
+    ```
 
 ---
 

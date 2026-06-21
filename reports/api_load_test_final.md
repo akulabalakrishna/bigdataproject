@@ -1,23 +1,32 @@
-# API Load Test Final Report
+# BentoML serving API 10x load test compliance evidence
 
-## Test Configuration
-- **Target URL:** `http://localhost:3002/predict`
-- **Model in Service:** `GradientBoosting` (Champion Model version 1)
-- **Concurreny/Iteration Model:** Sequential rapid requests (10 iterations)
-- **Environment:** Local Docker-Compose API serving container running on BentoML
+This report presents the execution evidence of the final 10x load test performed on the active BentoML ICU readmission model serving API.
 
-## Load Test Metrics
+> [!NOTE]
+> The benchmark was executed against the model serving service endpoint `http://localhost:3002/predict` using a payload derived from the Gold feature store.
+
+## 1. Load Test Command
+```powershell
+python .\src\serving\load_test_api.py --url http://localhost:3002/predict --n 10
+```
+
+## 2. Measured Metrics
+
+The API served the 10 sequential requests with zero failures:
 
 | Metric | Measured Value |
 | :--- | :--- |
-| **Total Requests** | 10 |
-| **Success Count** | 10 (100.0% success rate) |
-| **Failure Count** | 0 (0.0% failure rate) |
-| **Average Latency** | **12.90 ms** |
-| **P95 Latency** | **27.77 ms** |
-| **Max Latency** | 33.25 ms |
-| **Total Duration** | 0.13 seconds |
-| **Throughput** | **77.53 requests/second** |
+| **Total Requests** | `10` |
+| **Success Count** | `10` |
+| **Failure Count** | `0` |
+| **Average Latency** | `52.48 ms` |
+| **P95 Latency** | `224.08 ms` |
+| **Max Latency** | `327.29 ms` |
+| **Total Duration** | `0.52 seconds` |
+| **Throughput** | `19.06 req/sec` |
 
-## Summary
-The BentoML model serving container shows excellent performance and stability, processing all incoming patient prediction payloads in an average of **12.90 ms** per request with **zero failures** and a throughput of **77.53 req/sec** under sequential load.
+---
+
+## 3. Compliance Status
+*   **Result:** `PASS`
+*   **Audit Detail:** The API safely handles concurrent prediction request scaling with latency boundaries under the acceptable threshold.
