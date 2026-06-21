@@ -1,0 +1,25 @@
+# Final Submission Checklist
+
+- [x] Proposal submitted
+- [x] GitHub repository accessible
+- [x] README complete
+- [x] `.env` not committed
+- [x] `.env.example` complete
+- [x] All Docker services healthy
+- [x] Kafka streaming verified
+- [x] MinIO Iceberg verified
+- [x] Spark batch verified
+- [x] Spark Structured Streaming verified
+- [x] Airflow DAG verified
+- [x] Spark MLlib verified
+- [x] MLflow runs verified
+- [x] Registered model verified
+- [x] BentoML POST API verified
+- [x] Grafana three panels verified
+- [x] Two tests passed
+- [x] 10× load test passed
+- [x] AI-use declaration added
+- [x] Open-source tools acknowledged
+- [x] Final presentation commands verified
+- [ ] Eight-minute video recorded
+- [ ] Eight-minute video submitted

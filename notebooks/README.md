@@ -1,0 +1,1 @@
+This project uses production Python scripts for batch processing, streaming, training, serving, and orchestration. No notebook is required to run the production pipeline. Any exploratory work is intentionally separated from the deployable system.

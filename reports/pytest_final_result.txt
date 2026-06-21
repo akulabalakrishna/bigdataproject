@@ -1,10 +1,25 @@
 ============================= test session starts =============================
-platform win32 -- Python 3.10.11, pytest-9.0.3, pluggy-1.6.0
+platform win32 -- Python 3.10.11, pytest-9.0.3, pluggy-1.6.0 -- C:\Users\HP\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\python.exe
 cachedir: .pytest_cache
 rootdir: E:\Z5008_Readmission_Project
-collected 2 items
+plugins: anyio-4.8.0, Faker-40.15.0
+collecting ... collected 2 items
 
-tests/test_features.py::test_readmission_logic PASSED
-tests/test_serving.py::test_bento_prediction_preprocessing PASSED
+tests/test_features.py::test_readmission_logic PASSED                    [ 50%]
+tests/test_serving.py::test_bento_prediction_preprocessing PASSED        [100%]
 
-======================== 2 passed, 3 warnings in 2.93s ========================
+============================== warnings summary ===============================
+tests/test_serving.py::test_bento_prediction_preprocessing
+  C:\Users\HP\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\pathspec\pathspec.py:326: DeprecationWarning: GitWildMatchPattern ('gitwildmatch') is deprecated. Use 'gitignore' for GitIgnoreBasicPattern or GitIgnoreSpecPattern instead.
+    patterns = [use_factory(__line) for __line in lines if __line]  # type: ignore[arg-type]
+
+tests/test_serving.py::test_bento_prediction_preprocessing
+  C:\Users\HP\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\pathspec\pattern.py:125: DeprecationWarning: GitWildMatchPattern ('gitwildmatch') is deprecated. Use 'gitignore' for GitIgnoreBasicPattern or GitIgnoreSpecPattern instead.
+    raw_regex, include = self.pattern_to_regex(pattern)
+
+tests/test_serving.py::test_bento_prediction_preprocessing
+  C:\Users\HP\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\bentoml\_internal\io_descriptors\file.py:9: PendingDeprecationWarning: Please use `import python_multipart` instead.
+    from multipart.multipart import parse_options_header
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 2 passed, 3 warnings in 3.77s ========================
